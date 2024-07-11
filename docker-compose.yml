@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 3s
+      timeout: 3s
+      retries: 3
+
+  sender:
+    build:
+      context: .
+      dockerfile: Dockerfile.send
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  receiver:
+    build:
+      context: .
+      dockerfile: Dockerfile.receive
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+        
